@@ -104,20 +104,17 @@ int main()
     // cycle exists -> false
     Solution sol1;
     vector<vector<int>> prereq1 = {{1, 0}, {2, 1}, {0, 2}};
-    int num1 = 3;
-    cout << (sol1.canFinish(num1, prereq1) ? "true" : "false") << endl;
+    cout << (sol1.canFinish(3, prereq1) ? "true" : "false") << endl;
 
     // no cycle -> true
     Solution sol2;
     vector<vector<int>> prereq2 = {{1, 0}, {2, 1}, {3, 2}};
-    int num2 = 4;
-    cout << (sol2.canFinish(num2, prereq2) ? "true" : "false") << endl;
+    cout << (sol2.canFinish(4, prereq2) ? "true" : "false") << endl;
 
     // empty prerequisites -> true
     Solution sol3;
     vector<vector<int>> prereq3 = {};
-    int num3 = 0;
-    cout << (sol3.canFinish(num3, prereq3) ? "true" : "false") << endl;
+    cout << (sol3.canFinish(0, prereq3) ? "true" : "false") << endl;
 
     return 0;
 }
