@@ -1,54 +1,120 @@
 using namespace std;
 #include <iostream>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 
 /*  
-    PROBLEM 2: Loud And Rich (Graph)
-    There is a group of n people labeled from 0 to n - 1 where each person has a different amount of money and a different level of quietness.
+    PROBLEM 2: Course Schedule (Graph - Adjacency List)
+    There are a total of numCourses courses you have to take, labeled from 0 to numCourses - 1. You are given an array prerequisites where prerequisites[i] = [ai, bi] indicates that you must take course bi first if you want to take course ai.
 
-    You are given an array richer where richer[i] = [ai, bi] indicates that ai has more money than bi and an integer array quiet where quiet[i] is the quietness of the ith person. 
-    All the given data in richer are logically correct (i.e., the data will not lead you to a situation where x is richer than y and y is richer than x at the same time).
-
-    Return an integer array answer where answer[x] = y if y is the least quiet person (that is, the person y with the smallest value of quiet[y]) among all people who definitely 
-    have equal to or more money than the person x.
+    For example, the pair [0, 1], indicates that to take course 0 you have to first take course 1.
+    Return true if you can finish all courses. Otherwise, return false.
 */
 
 /* 
-    Input: richer = [[1,0],[2,1],[3,1],[3,7],[4,3],[5,3],[6,3]], quiet = [3,2,5,4,6,1,7,0]
-    Output: [5,5,2,5,4,5,6,7]
-
+    Input: numCourses = 2, prerequisites = [[1,0]]
+    Output: true
     Explanation: 
-    answer[0] = 5.
-    Person 5 has more money than 3, which has more money than 1, which has more money than 0.
-    The only person who is quieter (has lower quiet[x]) is person 7, but it is not clear if they have more money than person 0.
-    answer[7] = 7.
-    Among all people that definitely have equal to or more money than person 7 (which could be persons 3, 4, 5, 6, or 7), the person who is the quietest (has lower quiet[x]) is person 7.
-    The other answers can be filled out with similar reasoning.
+    There are a total of 2 courses to take. 
+    To take course 1 you should have finished course 0. So it is possible.
 */
 
 /*
     Dont Assume!
     Questions:
+        Is the graph directed or undirected?
+        → e.g., A → B vs. A ↔ B.
 
-        
+        Can there be cycles?
+        → affects if you need cycle detection (for topological sort, DFS recursion, etc.).
+
+        Is the graph weighted or unweighted?
+        → determines if you need Dijkstra/Bellman-Ford or just BFS.
+
+        Are negative weights allowed?
+        → if yes, Dijkstra fails, use Bellman-Ford.
+
+        Can there be self-loops or multiple edges between the same nodes?
+        → e.g., [a, a] or two edges (a, b) repeated.  
 */
 
 /*
-    Idea: 
+    Idea: build adjacency list graph
+          check for back edge in graph 
+          return false if cycle true otehrwise
 */
 
-bool loudAndRich(vector<vector<int>>& richer, vector<int>& quiet)
-{
-    
-}
+class Solution {
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) 
+    {
+        // build map (empty)
+        for(int i = 0; i < numCourses; i++)
+        {
+            adjList[i] = {};
+        }
 
+        // fill dependency list for courses
+        for (const auto& prereq: prerequisites)
+        {
+            adjList[prereq[0]].push_back(prereq[1]);
+        }
 
+        // perform dfs on every course in directed graph
+        for (const auto& [course, v] : adjList)
+        {
+            if (!dfs(course)) {return false;}
+        }
+        return true;
+    }
+
+private:
+    // represent vector of pairs as a directed graph
+    unordered_map<int, vector<int>> adjList;
+    unordered_set<int> seen;
+
+    bool dfs(int course)
+    {
+        // base case
+        if (adjList[course].empty()) {return true;} // no dependencies
+
+        // check for cycle 
+        if (seen.find(course) != seen.end()) {return false;} // back edge found
+
+        //otherwise insert
+        seen.insert(course);
+
+        // for each prereq course perform dfs
+        for (const auto& prereq: adjList[course])
+        {
+            if (!dfs(prereq)) {return false;}
+        }
+
+        seen.erase(course);
+        adjList[course].clear();
+        return true;
+    }
+};
 
 int main() 
 {
     // test cases
+    
+    // cycle exists -> false
+    Solution sol1;
+    vector<vector<int>> prereq1 = {{1, 0}, {2, 1}, {0, 2}};
+    cout << (sol1.canFinish(3, prereq1) ? "true" : "false") << endl;
 
+    // no cycle -> true
+    Solution sol2;
+    vector<vector<int>> prereq2 = {{1, 0}, {2, 1}, {3, 2}};
+    cout << (sol2.canFinish(4, prereq2) ? "true" : "false") << endl;
+
+    // empty prerequisites -> true
+    Solution sol3;
+    vector<vector<int>> prereq3 = {};
+    cout << (sol3.canFinish(0, prereq3) ? "true" : "false") << endl;
 
     return 0;
 }
